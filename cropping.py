@@ -19,7 +19,7 @@ class crop_and_save(object):
                         resize_to:Dimension of final output image after cropping (type is (int,int)) default is None, meaning no resizing will occur
                         images_prefix:Prefix of all output Image crops (type is string)
                         images_ext:Extension with which crops should be saved with (type is string) Eg:'.png'"""
-    
+
     def __init__(self,IM_FOLDER=Path.cwd()/'Images',
                  MASK_FOLDER=Path.cwd()/'Masks',
                  OUTPUT_FOLDER=Path.cwd(),
@@ -29,6 +29,8 @@ class crop_and_save(object):
                  width_division=5,
                  height_division=None,
                  size=150,
+                 spatial_resolution_in=None,
+                 spatial_resolution_out=None,
                  pre_resize=None,
                  resize_to=None,
                  images_prefix=None,
@@ -46,8 +48,16 @@ class crop_and_save(object):
                 self.height_division=width_division
             self.size=size
             self.resize_to=resize_to
+
             self.pre_resize=pre_resize
-            self.images_prefix=images_prefix
+            if spatial_resolution_in is not None and spatial_resolution_out is not None:
+                if spatial_resolution_in == spatial_resolution_out:
+                    pass
+                else:
+                    self.pre_resize = 'spatial'
+                    self.spatial_scale_factor = spatial_resolution_in / spatial_resolution_out
+
+            self.images_prefix=images_prefix if images_prefix is not None else ''
             self.images_ext=images_ext
         
     def open_image(self,img_path):                                                                  #Reads and returns image from img_path
@@ -87,17 +97,19 @@ class crop_and_save(object):
         return(self.images_prefix+name+self.images_ext)
 
     def presize(self,img):
-        if(self.pre_resize):
-            return cv2.resize(img,(self.pre_resize))
+        if self.pre_resize == 'spatial':
+            self.pre_resize = (int(img.shape[1] * self.spatial_scale_factor), int(img.shape[0] * self.spatial_scale_factor))
+        if self.pre_resize:
+            return cv2.resize(img,self.pre_resize)
         return img
     
     def resize(self,img):
         if(self.resize_to):
-            return cv2.resize(img,(self.resize_to))
+            return cv2.resize(img,self.resize_to)
         return img
 
     def process(self):
-        img_path_list = [pth for pth in self.IM_FOLDER.iterdir()]  #modify to search for png ,jpg , etc
+        img_path_list = [pth for pth in self.IM_FOLDER.iterdir()]  # modify to search for png ,jpg , etc
         self.make_dir(self.OUTPUT_FOLDER)
         print("Cropping and saving images and masks from corresponding folders")
         for img_path in tqdm(img_path_list):
