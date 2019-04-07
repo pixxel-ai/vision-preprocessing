@@ -74,6 +74,7 @@ class crop_and_save(object):
             self.images_prefix=images_prefix if images_prefix is not None else ''
             self.images_ext=images_ext
             self.delete_after_processing = delete_files_after_processing
+
             self.export_as = export_as
             self.import_only = import_only
             self.transformer = Transformer()
@@ -172,8 +173,3 @@ class crop_and_save(object):
             if self.delete_after_processing:
                 delete_file(img_path)
                 delete_file((mask_path))
-
-###################################################    SAMPLE      ########################################################
-
-
-IM=Path.cwd()/'Images'
