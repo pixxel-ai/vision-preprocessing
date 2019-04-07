@@ -3,6 +3,7 @@ from pathlib import Path
 import pandas
 from tqdm import tqdm
 import numpy as np
+from convenience_functions import delete_file, is_file
 
 class crop_and_save(object):
     """Function crops an image into width_division*height_division number of images and stores the output to OUTPUT_FOLDER
@@ -25,7 +26,7 @@ class crop_and_save(object):
                  OUTPUT_FOLDER=Path.cwd(),
                  IM_OUT='Images',
                  MASK_OUT='Masks',
-                 co_mask=Path('Mask'),
+                 get_mask_from_image=Path('Mask'),
                  width_division=5,
                  height_division=None,
                  size=150,
@@ -34,15 +35,16 @@ class crop_and_save(object):
                  pre_resize=None,
                  resize_to=None,
                  images_prefix=None,
-                 images_ext='.png'):
+                 images_ext='.png',
+                 delete_files_after_processing:bool=False):
             self.IM_FOLDER=IM_FOLDER
             self.MASK_FOLDER=MASK_FOLDER
             self.OUTPUT_FOLDER=OUTPUT_FOLDER
             self.IM_OUT=IM_OUT
             self.MASK_OUT=MASK_OUT
-            self.co_mask=co_mask
+            self.get_mask_from_image=get_mask_from_image
             self.width_division=width_division
-            if(height_division):
+            if height_division:
                 self.height_division=height_division
             else:
                 self.height_division=width_division
@@ -59,6 +61,7 @@ class crop_and_save(object):
 
             self.images_prefix=images_prefix if images_prefix is not None else ''
             self.images_ext=images_ext
+            self.delete_after_processing = delete_files_after_processing
         
     def open_image(self,img_path):                                                                  #Reads and returns image from img_path
             img=cv2.imread(img_path.__str__())
@@ -87,11 +90,19 @@ class crop_and_save(object):
         location=self.OUTPUT_FOLDER/self.IM_OUT
         self.make_dir(location)
         cv2.imwrite((location/image_name).__str__(),crop)
+        if is_file(location/image_name):
+            return True
+        else:
+            raise IOError
     
     def save_mask_crop(self,crop,image_name):                                                       #saves crop of a mask
         location=self.OUTPUT_FOLDER/self.MASK_OUT
         self.make_dir(location)
         cv2.imwrite((location/(image_name)).__str__(),crop)
+        if is_file(location/image_name):
+            return True
+        else:
+            raise IOError
     
     def make_name(self,name):                                                                       #returns name of crop
         return(self.images_prefix+name+self.images_ext)
@@ -120,7 +131,7 @@ class crop_and_save(object):
                     crop= self.resize(crop)
                     self.save_image_crop(crop,self.make_name(img_path.stem+'crop'+str(crop_number)))
                     crop_number+=1
-            mask_path=self.co_mask(img_path)        # Sets corresponding mask path for given image path 
+            mask_path=self.get_mask_from_image(img_path)        # Sets corresponding mask path for given image path
             mask=self.open_image(mask_path)            # Loads corresponding mask of image
             mask=self.presize(mask)
             crop_number=1
@@ -128,6 +139,9 @@ class crop_and_save(object):
                     crop=self.resize(crop)
                     self.save_mask_crop(crop,self.make_name(img_path.stem+'crop'+str(crop_number)))
                     crop_number+=1
+            if self.delete_after_processing:
+                delete_file(img_path)
+                delete_file((mask_path))
 
 ###################################################    SAMPLE      ########################################################
 
