@@ -4,22 +4,32 @@ import pandas
 from tqdm import tqdm
 import numpy as np
 from convenience_functions import delete_file, is_file
-
+from transformations import *
 class crop_and_save(object):
     """Function crops an image into width_division*height_division number of images and stores the output to OUTPUT_FOLDER
         -----------------------------------------------------Parameters-------------------------------------------------------
-                        IM_FOLDER:Path to folder that contains all the images (type is PosixPath or WindowsPath)
-                        MASK_FOLDER:Path to folder that contains all the masks (type is PosixPath or WindowsPath)
-                        OUTPUT_FOLDER:Path to folder that crops will be stored in (type is PosixPath or WindowsPath)
-                        IM_OUT:Name of folder in which cropped images should be stored, under OUTPUT_FOLDER (type is string)
-                        MASK_OUT:Name of folder in which cropped masks should be stored, under OUTPUT_FOLDER (type is string)
-                        width_division:Number of divisions to be put along width of the image (type is int)
-                        height_division:Number of divisions to be put along height of the image (type is int)
-                        size:Desired dimension of the output cropped images (type is int)
-                        pre_resize:Dimension that original image should be resized to before cropping (typr is (int,int)) default is None, meaning no resizing will occur
-                        resize_to:Dimension of final output image after cropping (type is (int,int)) default is None, meaning no resizing will occur
-                        images_prefix:Prefix of all output Image crops (type is string)
-                        images_ext:Extension with which crops should be saved with (type is string) Eg:'.png'"""
+                        IM_FOLDER: Path to folder that contains all the images (type is PosixPath or WindowsPath)
+                        MASK_FOLDER: Path to folder that contains all the masks (type is PosixPath or WindowsPath)
+                        OUTPUT_FOLDER: Path to folder that crops will be stored in (type is PosixPath or WindowsPath)
+                        IM_OUT: Name of folder in which cropped images should be stored, under OUTPUT_FOLDER (type is string)
+                        MASK_OUT: Name of folder in which cropped masks should be stored, under OUTPUT_FOLDER (type is string)
+                        width_division: Number of divisions to be put along width of the image (type is int)
+                        height_division: Number of divisions to be put along height of the image (type is int)
+                        size: Size of each crop before resizing
+                        pre_resize: Dimension that original image should be resized to before cropping (typr is (int,int)) default is None, meaning no resizing will occur
+                        resize_to: Dimension of final output image after cropping (type is (int,int)) default is None, meaning no resizing will occur
+                        images_prefix: Prefix of all output Image crops (type is string)
+                        images_ext: Extension with which crops should be saved with (type is string) Eg:'.png'
+                        spatial_resolution_in: Spatial resolution of images in the dataset
+                        spatial_resolution_out: The spatial resolution to which the images will be rescaled to
+                        delete_filer_after_processing: If `True`, all the original files will be deleted after they have been processed
+                        import_only:
+                            'Roads' : Read only pixels of value = 1 for each mask
+                            'Buildings' : Read only pixels of value = 2 for each mask
+                        export_as:
+                            'Roads' : Convert all non zero pixel values to 1 before saving each mask
+                            'Buildings' : Convert all non zero pixel values to 2 before saving each mask
+                        """
 
     def __init__(self,IM_FOLDER=Path.cwd()/'Images',
                  MASK_FOLDER=Path.cwd()/'Masks',
@@ -36,7 +46,9 @@ class crop_and_save(object):
                  resize_to=None,
                  images_prefix=None,
                  images_ext='.png',
-                 delete_files_after_processing:bool=False):
+                 delete_files_after_processing:bool=False,
+                 import_only='Roads',
+                 export_as='Roads'):
             self.IM_FOLDER=IM_FOLDER
             self.MASK_FOLDER=MASK_FOLDER
             self.OUTPUT_FOLDER=OUTPUT_FOLDER
@@ -62,12 +74,29 @@ class crop_and_save(object):
             self.images_prefix=images_prefix if images_prefix is not None else ''
             self.images_ext=images_ext
             self.delete_after_processing = delete_files_after_processing
+            self.export_as = export_as
+            self.import_only = import_only
+            self.transformer = Transformer()
+
+            if import_only == 'Roads':
+                self.transformer.transforms.append(extract_roads)
+            elif import_only == 'Buildings':
+                self.transformer.transforms.append(extract_buildings)
+
+            if export_as == 'Roads':
+                self.transformer.transforms.append(convert_to_roads)
+            elif export_as == 'Buildings':
+                self.transformer.transforms.append(convert_to_buildings)
+
         
-    def open_image(self,img_path):                                                                  #Reads and returns image from img_path
+    def open_image(self,img_path, is_mask=False):   # Reads and returns image from img_path
+            if is_mask:
+                mask = cv2.imread(img_path.__str__(), cv2.IMREAD_GRAYSCALE)
+                return mask
             img=cv2.imread(img_path.__str__())
             return img
        
-    def crop_image(self,img):                                                                       #iterates through list of crops generated from image
+    def crop_image(self,img):  # iterates through list of crops generated from image
             #col_division equals width division
             #row_division equals height division
             delta_row=(self.size*self.height_division-(np.shape(img))[0])/(self.height_division-1)   #overlap between crops along height
@@ -98,6 +127,7 @@ class crop_and_save(object):
     def save_mask_crop(self,crop,image_name):                                                       #saves crop of a mask
         location=self.OUTPUT_FOLDER/self.MASK_OUT
         self.make_dir(location)
+        crop = self.transformer(crop)
         cv2.imwrite((location/(image_name)).__str__(),crop)
         if is_file(location/image_name):
             return True
@@ -132,7 +162,7 @@ class crop_and_save(object):
                     self.save_image_crop(crop,self.make_name(img_path.stem+'crop'+str(crop_number)))
                     crop_number+=1
             mask_path=self.get_mask_from_image(img_path)        # Sets corresponding mask path for given image path
-            mask=self.open_image(mask_path)            # Loads corresponding mask of image
+            mask=self.open_image(mask_path, is_mask=True)            # Loads corresponding mask of image
             mask=self.presize(mask)
             crop_number=1
             for crop in(self.crop_image(mask)):
