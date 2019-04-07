@@ -96,7 +96,7 @@ class crop_and_save(object):
                 return mask
             img=cv2.imread(img_path.__str__())
             return img
-       
+
     def crop_image(self,img):  # iterates through list of crops generated from image
             #col_division equals width division
             #row_division equals height division

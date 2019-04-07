@@ -1,86 +1,119 @@
 # CHANGE SPATIAL RESOLUTION AND CROP #
 ### code to change spatial resolution of Images and crop Images and Masks ###
-                (The code involves three python files as stated below )
+                (The code involves three major python files as stated below )
 
 
 
 *****************************************************************************************************************************
+The code executes image processing of images/masks. Firstly, the spatial resolution of the image/mask is changed, with an option to delete the original files simultaneously to free up the space. After this, these images/masks can be passed for cropping into a specified number of divisions (specified by height_division, width_division and size) and the resultant cropped images can be optionally resized. An additional functionality of extracting and/or exporting only roads and buildings from the masks has also been created through convenience functions.
 
+#### A working example can be seen in the test.py file ####
+
+There are three files involved in this code, as mentioned below. 
 
 
 #### Files involved :- ####
 
-* ##### resize.py #####
-    Class *change_and_save* changes the spatial resolution of the images.
-      
-     It asks for corresponding deletion of original images from the user from the original image folder.
+* ##### cropping.py #####
+    Class *crop_and_save* changes the spatial resolution of the images/masks and then crops them into width_division* height_division number of images and stores the output to OUTPUT_FOLDER .
+    It also asks for corresponding deletion of original images from the user from the original image folder.
+    The Parameters involved are :
     
-    
-     The Parameters involved are :- 
-    * *IM_FOLDER* : Path to folder that contains all the images (type is PosixPath or WindowsPath)
-    * *OUTPUT_FOLDER* : Path to folder that crops will be stored in (type is PosixPath or WindowsPath)
-    * *IM_OUT* : Name of folder in which new images should be stored, under OUTPUT_FOLDER (type is string)
-    * *images_prefix* : Prefix of all output resized images (type string)
-    * *pre_res* : The original resolution to be entered by the user (type integer)
-    * *final_res* : The final resolution in which it is to be converted (type is int)
-    * *width* : Width of the image in pixels, to be entered by the user ( type int, None by default)
-    * *height* : height of the image in pixels, to be entered by the user (type int, None by default)
-    * *images_ext* : Extension with which crops should be saved with (type is string) Eg:'.png'
-    
-        
-       Functions involved are ( names are self-explanatory ) :-
+     * *IM_FOLDER* : Path to folder that contains all the images (type is PosixPath or WindowsPath)
+              
+     * *MASK_FOLDER* : Path to folder that contains all the masks (type is PosixPath or WindowsPath)
+     * *OUTPUT_FOLDER* : Path to folder that crops will be stored in (type is PosixPath or WindowsPath)
+     * *IM_OUT* : Name of folder in which cropped images should be stored, under OUTPUT_FOLDER (type is string)
+     * *MASK_OUT* : Name of folder in which cropped masks should be stored, under OUTPUT_FOLDER (type is string)
+     * *width_division* : Number of divisions to be put along width of the image (type is int)
+     * *height_division* : Number of divisions to be put along height of the image (type is int)
+     * *size* : Size of each crop before resizing
+     * *pre_resize* : Dimension that original image should be resized to before cropping (typr is (int,int)) default is None, meaning no resizing will occur
+     * *resize_to* : Dimension of final output image after cropping (type is (int,int)) default is None, meaning no resizing will occur
+     * *images_prefix* : Prefix of all output Image crops (type is string)
+     * *images_ext* : Extension with which crops should be saved with (type is string) Eg:'.png'
+     * *spatial_resolution_in* : Spatial resolution of images in the dataset
+     * *spatial_resolution_out* : The spatial resolution to which the images will be rescaled to
+     * *delete_filer_after_processing* : If `True`, all the original files will be deleted after they have been processed
+     * *import_only* :
+         * 'Roads' : Read only pixels of value = 1 for each mask
+         * 'Buildings' : Read only pixels of value = 2 for each mask
+     * *export_as* :
+         * 'Roads' : Convert all non zero pixel values to 1 before saving each mask
+         * 'Buildings' : Convert all non zero pixel values to 2 before saving each mask
+                         
+    Functions involved are ( names are self-explanatory ) :-
     * *open_image* 
-    * *change_resolution* : changes the resolution by respective multiplication of dimensions by the factor desired
-    * *make_dir*
-    * *save_final_image*
+    * *change_resolution* : changes the resolution by respective multiplication of dimensions by the factor calculated                                                          * *make_dir*
+    * *make_dir* : makes the output directory if it does not exist
     * *process* : iterates over the image files in the input folder,
                   also asks for user's choice to delete the original images or not 
-
-* ##### cropping.py #####
-    Class *crop_and_save* creates crops 
-    To crop an image (and the masks) into width_division*height_division number of images and store the output to             OUTPUT_FOLDER
-    The Parameters involved are :-
-    *  *IM_FOLDER*:Path to folder that contains all the images (type is PosixPath or WindowsPath)
-    *  *MASK_FOLDER*:Path to folder that contains all the masks (type is PosixPath or WindowsPath)
-    *  *OUTPUT_FOLDER* : Path to folder that crops will be stored in (type is PosixPath or WindowsPath)
-    *  *IM_OUT* : Name of folder in which cropped images should be stored, under OUTPUT_FOLDER (type is string)
-    *  *MASK_OUT* : Name of folder in which cropped masks should be stored, under OUTPUT_FOLDER (type is string)
-    *  *width_division* : Number of divisions to be put along width of the image (type is int)
-    *  *height_division* : Number of divisions to be put along height of the image (type is int)
-    *  *size* : Desired dimension of the output cropped images (type is int)
-    *  *pre_resize* : Dimension that original image should be resized to before cropping (typr is (int,int)) default is None,                       meaning no resizing will occur
-    *  *resize_to* : Dimension of final output image after cropping (type is (int,int)) default is None, meaning no resizing                       will occur
-    *  *images_prefix* : Prefix of all output Image crops (type is string)
-    *  *images_ext* : Extension with which crops should be saved with (type is string) Eg:'.png'
-      Functions involved are (names are self explanatory ) :-
-    * *open_image* 
-    * *crop_image* : crops the input image using basic mathematics by counting the number of overlaps which would be created
-    * *make_dir* : makes an output directory if it is already not existing
-    * *save_image_crop*
+    * *crop_image* : crops the image by iterating through the image/mask, the number of overlap times
+                    ( calculated in delta_row and delta_col )
+    * *save_image_crop* 
     * *save_mask_crop*
-    * *make_name* : to generate names for the final images
-    * *presize* : in case dont want to execute spatial resolution
-    * *resize* : to resize the final crop
-    * *process* : iterates over the images and masks to crop, resize and save them
-    
-* ##### cropandresize.py #####
-    The file to combine the functionalities of both other files. It firsts implements spatial resolution on the images (using an object of change_and_save) and then passes it on along with the masks for cropping (to cropping.py).
-    
+    * *make_name* 
+    * *presize*
+    * *resize* 
+    * *process* 
+                    
+* ##### transformations.py #####
+    The class *Transformer* applies a list of functions (transforms) to any given image / mask
+    Transforms will be applied in the order they are passed in the list
+    A transform function is assumed to behave like so:
+        transform( image_object ) -> image_object
+        where the returned image_object is of the same size as the original image_object
 
-*****************************************************************************************************************************
+    :returns: A callable instance of a class that applies all the transforms to the passed image_object
+
+    Example usage :
+    img = cv2.imread(file_path)
+    transformer = Transformer([extract_roads, convert_to_roads])
+    img = transformer(img)
+    
+    The Functions and respective parameters involved are :-
+    * *transforms* : (parameter) List of functions that can be applied to the image on calling class 
+    * *extract_roads* : Takes as input a Mask, and Sets all non-road pixels to Zero.
+                        A Roads pixel is defined as a Pixel with value = 1
+        * param mask: Mask. Type : numpy.ndarray
+        * return: Mask with Roads only
+    * *extract_buildings* :  Takes as input a Mask, and Sets all non-building pixels to Zero.
+                         A Building pixel is defined as a Pixel with value = 2
+        * param mask: Mask. Type : numpy.ndarray
+        * return: Mask with Buildings only
+    * *extract_number_from_image* : General function to extract given pixels only and set all others to Zero.
+        * param mask: Mask. Type : numpy.ndarray
+        * param number: Pixel number which has to be extracted. Type : int
+        * return: Mask with 'number' pixels only             
+    * *convert_to_roads* : Equalize all values in mask to Road-pixels
+                       A Road-pixel has value 1
+        * param mask: Mask to equalize
+        * return: Returns equalized mask
+    * *convert_to_buildings* : Equalize all values in mask to Road-pixels
+                           A Road-pixel has value 1
+        * param mask: Mask to equalize
+        * return: Returns equalized mask
+                              
+* ##### convenience.py #####
+    This file comprises of many functions that help to create various check-points in the processing as well 
+    as add further provide added features. 
+    The Functions and respective parameters are :
+    * *find_number_in_string* : Finds and returns a number sequence in a given string.
+                                Assumes : The string has only one continuously unbroken sequence of numbers. If there are multiple sequences,
+                                the first one will be returned.
+        * param s: String containing number sequence. Type : str or pathlib.Path
+        * return: String representation of the Number found in the string.                   
+
+    * *is_file(PATH)-> bool* : Returns True if the file at `PATH` exists with Size > 0
+    * *delete_file(PATH)-> bool* : To delete the file if found there.
+                
+    
 
 
 
 ### MODULES/PACKAGES USED ###
-  * **pathlib** : for retrieving and assigning paths to directories and images
-  * **PIL** :  for opening, manipulating, and saving different image file formats
-  * **cv2** : to solve computer vision problems and to integrate with other libraries that use Numpy  
-  * **pandas** : for data manipulation and analysis
-  * **tqdm** : for progress bars
-  * **numpy** :  for Scientific Computing of various data types
-  * **os** : for using operating system dependent functionality (like deletion of original images)
-  
-  Some changes and updates are still in progress for better results and added features.
-  * **sys** : for using exit() function
+   * **pathlib** : for retrieving and assigning paths to directories and images
+   * **cv2** : to solve computer vision problems and to integrate with other libraries that use Numpy  
+   * **tqdm** : for progress bars
+   * **numpy** :  for Scientific Computing of various data types
     
-
