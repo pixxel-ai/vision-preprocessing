@@ -1,15 +1,11 @@
 # CHANGE SPATIAL RESOLUTION AND CROP #
-### code to change spatial resolution of Images and crop Images and Masks ###
-                (The code involves three major python files as stated below )
 
 
 
 *****************************************************************************************************************************
 The code executes image processing of images/masks. Firstly, the spatial resolution of the image/mask is changed, with an option to delete the original files simultaneously to free up the space. After this, these images/masks can be passed for cropping into a specified number of divisions (specified by height_division, width_division and size) and the resultant cropped images can be optionally resized. An additional functionality of extracting and/or exporting only roads and buildings from the masks has also been created through convenience functions.
 
-#### A working example can be seen in the test.py file ####
-
-There are three files involved in this code, as mentioned below. 
+###### A working example can be seen in the test.py file ######
 
 
 #### Files involved :- ####
@@ -19,19 +15,19 @@ There are three files involved in this code, as mentioned below.
     It also asks for corresponding deletion of original images from the user from the original image folder.
     The Parameters involved are :
     
-     * *IM_FOLDER* : Path to folder that contains all the images (type is PosixPath or WindowsPath)
+     * *IM_FOLDER* : Path to folder that contains all the images
               
-     * *MASK_FOLDER* : Path to folder that contains all the masks (type is PosixPath or WindowsPath)
-     * *OUTPUT_FOLDER* : Path to folder that crops will be stored in (type is PosixPath or WindowsPath)
-     * *IM_OUT* : Name of folder in which cropped images should be stored, under OUTPUT_FOLDER (type is string)
-     * *MASK_OUT* : Name of folder in which cropped masks should be stored, under OUTPUT_FOLDER (type is string)
-     * *width_division* : Number of divisions to be put along width of the image (type is int)
-     * *height_division* : Number of divisions to be put along height of the image (type is int)
+     * *MASK_FOLDER* : Path to folder that contains all the masks
+     * *OUTPUT_FOLDER* : Path to folder that crops will be stored in
+     * *IM_OUT* : Name of folder in which cropped images should be stored, under OUTPUT_FOLDER
+     * *MASK_OUT* : Name of folder in which cropped masks should be stored, under OUTPUT_FOLDER
+     * *width_division* : Number of divisions to be put along width of the image
+     * *height_division* : Number of divisions to be put along height of the image
      * *size* : Size of each crop before resizing
-     * *pre_resize* : Dimension that original image should be resized to before cropping (typr is (int,int)) default is None, meaning no resizing will occur
-     * *resize_to* : Dimension of final output image after cropping (type is (int,int)) default is None, meaning no resizing will occur
-     * *images_prefix* : Prefix of all output Image crops (type is string)
-     * *images_ext* : Extension with which crops should be saved with (type is string) Eg:'.png'
+     * *pre_resize* : Dimension that original image should be resized to before cropping
+     * *resize_to* : Dimension of final output image after cropping 
+     * *images_prefix* : Prefix of all output Image crops 
+     * *images_ext* : Extension with which crops should be saved with Eg:'.png'
      * *spatial_resolution_in* : Spatial resolution of images in the dataset
      * *spatial_resolution_out* : The spatial resolution to which the images will be rescaled to
      * *delete_filer_after_processing* : If `True`, all the original files will be deleted after they have been processed
@@ -58,11 +54,12 @@ There are three files involved in this code, as mentioned below.
     * *process* 
                     
 * ##### transformations.py #####
+    
     The class *Transformer* applies a list of functions (transforms) to any given image / mask
     Transforms will be applied in the order they are passed in the list
     A transform function is assumed to behave like so:
-        transform( image_object ) -> image_object
-        where the returned image_object is of the same size as the original image_object
+    transform( image_object ) -> image_object
+    where the returned image_object is of the same size as the original image_object
 
     :returns: A callable instance of a class that applies all the transforms to the passed image_object
 
@@ -112,8 +109,9 @@ There are three files involved in this code, as mentioned below.
 
 
 ### MODULES/PACKAGES USED ###
-   * **pathlib** : for retrieving and assigning paths to directories and images
-   * **cv2** : to solve computer vision problems and to integrate with other libraries that use Numpy  
-   * **tqdm** : for progress bars
-   * **numpy** :  for Scientific Computing of various data types
+   * **pathlib**
+   * **cv2**   
+   * **tqdm** 
+   * **numpy** 
+   * **multiprocessing** 
     

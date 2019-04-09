@@ -153,10 +153,15 @@ class crop_and_save(object):
         return img
 
     def process(self,img_path):
-        #img_path_list = [pth for pth in self.IM_FOLDER.iterdir()]  # modify to search for png ,jpg , etc
-        #self.make_dir(self.OUTPUT_FOLDER)
-        #print("Cropping and saving images and masks from corresponding folders")
-        #for img_path in tqdm(img_path_list):
+        """
+        original code:-
+        :param img_path:
+        :return:
+        img_path_list = [pth for pth in self.IM_FOLDER.iterdir()]  # modify to search for png ,jpg , etc
+        self.make_dir(self.OUTPUT_FOLDER)
+        print("Cropping and saving images and masks from corresponding folders")
+        for img_path in tqdm(img_path_list):
+        """
             img=self.open_image(img_path)            # Loads image
             img= self.presize(img)
             crop_number=1

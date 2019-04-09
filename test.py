@@ -42,11 +42,11 @@ processor = crop_and_save(IM_FOLDER=IM_FOLDER,
 
 #%%
 if __name__ == '__main__' :
-    img_path_list = [pth for pth in IM_FOLDER.iterdir()]  # modify to search for png ,jpg , etc
+    img_path_list = [pth for pth in IM_FOLDER.iterdir()]
     processor.make_dir(processor.OUTPUT_FOLDER)
     print("\nCropping and saving images and masks from corresponding folders")
     p = Pool(processes=len(img_path_list))
     async_result = p.map_async(processor.process,tqdm(img_path_list))
     p.close()
     p.join()
-    print("\n multiprocessing complete")
+    print("\n multiprocessing complete")#as a checkpoint
