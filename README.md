@@ -8,9 +8,9 @@ The code executes image processing of images/masks. Firstly, the spatial resolut
 ###### A working example can be seen in the test.py file ######
 
 
-#### Files involved :- ####
+## Files involved :- ##
 
-* ##### cropping.py #####
+* ### cropping.py ###
     Class *crop_and_save* changes the spatial resolution of the images/masks and then crops them into width_division* height_division number of images and stores the output to OUTPUT_FOLDER .
     It also asks for corresponding deletion of original images from the user from the original image folder.
     The Parameters involved are :
@@ -53,7 +53,7 @@ The code executes image processing of images/masks. Firstly, the spatial resolut
     * *resize* 
     * *process* 
                     
-* ##### transformations.py #####
+* ### transformations.py ###
     
     The class *Transformer* applies a list of functions (transforms) to any given image / mask
     Transforms will be applied in the order they are passed in the list
@@ -91,7 +91,7 @@ The code executes image processing of images/masks. Firstly, the spatial resolut
         * param mask: Mask to equalize
         * return: Returns equalized mask
                               
-* ##### convenience.py #####
+* ### convenience.py ###
     This file comprises of many functions that help to create various check-points in the processing as well 
     as add further provide added features. 
     The Functions and respective parameters are :
