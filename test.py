@@ -1,6 +1,9 @@
 from cropping import crop_and_save
 from convenience_functions import find_number_in_string
 from pathlib import Path
+import multiprocessing
+from multiprocessing import Pool
+from tqdm import tqdm
 
 IM_FOLDER = Path('/Users/akash/Desktop/AI/Pixxel/Roads/Datasets/GANModel Data/mass_IMAGES_TEST copy')
 MSK_FOLDER = Path('/Users/akash/Desktop/AI/Pixxel/Roads/Datasets/GANModel Data/mass_MASKS_TEST copy')
@@ -38,5 +41,12 @@ processor = crop_and_save(IM_FOLDER=IM_FOLDER,
 
 
 #%%
-processor.process()
-
+if __name__ == '__main__' :
+    img_path_list = [pth for pth in IM_FOLDER.iterdir()]  # modify to search for png ,jpg , etc
+    processor.make_dir(processor.OUTPUT_FOLDER)
+    print("\nCropping and saving images and masks from corresponding folders")
+    p = Pool(processes=len(img_path_list))
+    async_result = p.map_async(processor.process,tqdm(img_path_list))
+    p.close()
+    p.join()
+    print("\n multiprocessing complete")

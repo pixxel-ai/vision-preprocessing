@@ -3,6 +3,8 @@ from pathlib import Path
 import pandas
 from tqdm import tqdm
 import numpy as np
+import multiprocessing
+from multiprocessing import Pool
 from convenience_functions import delete_file, is_file
 from transformations import *
 class crop_and_save(object):
@@ -150,11 +152,11 @@ class crop_and_save(object):
             return cv2.resize(img,self.resize_to)
         return img
 
-    def process(self):
-        img_path_list = [pth for pth in self.IM_FOLDER.iterdir()]  # modify to search for png ,jpg , etc
-        self.make_dir(self.OUTPUT_FOLDER)
-        print("Cropping and saving images and masks from corresponding folders")
-        for img_path in tqdm(img_path_list):
+    def process(self,img_path):
+        #img_path_list = [pth for pth in self.IM_FOLDER.iterdir()]  # modify to search for png ,jpg , etc
+        #self.make_dir(self.OUTPUT_FOLDER)
+        #print("Cropping and saving images and masks from corresponding folders")
+        #for img_path in tqdm(img_path_list):
             img=self.open_image(img_path)            # Loads image
             img= self.presize(img)
             crop_number=1
@@ -173,3 +175,6 @@ class crop_and_save(object):
             if self.delete_after_processing:
                 delete_file(img_path)
                 delete_file((mask_path))
+
+
+
