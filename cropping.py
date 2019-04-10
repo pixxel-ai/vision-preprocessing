@@ -2,8 +2,8 @@ import cv2
 from pathlib import Path
 from tqdm import tqdm
 import numpy as np
-from convenience_functions import delete_file, is_file
-from transformations import *
+from .convenience_functions import delete_file, is_file
+from .transformations import *
 
 
 class CropAndSave(object):
@@ -100,7 +100,7 @@ class CropAndSave(object):
             img=cv2.imread(img_path.__str__())
             return img
        
-    def crop_image(self,img):  # iterates through list of crops generated from image
+    def crop_image(self,img, is_mask=False):  # iterates through list of crops generated from image
             #col_division equals width division
             #row_division equals height division
             if self.height_division == 1 and self.width_division == 1:
@@ -126,7 +126,10 @@ class CropAndSave(object):
                     for col in range(self.width_division):
                         start_row=int(row*(self.size - overlap_rows))
                         start_col=int(col*(self.size - overlap_column))
-                        yield(img[start_row:start_row+self.size,start_col:start_col+self.size,:])
+                        if is_mask:
+                            yield(img[start_row : start_row + self.size, start_col : start_col + self.size])
+                        else:
+                            yield(img[start_row : start_row + self.size, start_col : start_col + self.size, :])
 
 
     @staticmethod
@@ -175,21 +178,21 @@ class CropAndSave(object):
         self.make_dir(self.OUTPUT_FOLDER)
         print("Cropping and saving images and masks from corresponding folders")
         for img_path in tqdm(img_path_list):
-            img=self.open_image(img_path)            # Loads image
-            img= self.presize(img)
-            crop_number=1
+            img = self.open_image(img_path)            # Loads image
+            img = self.presize(img)
+            crop_number = 1
             for crop in(self.crop_image(img)):
-                    crop= self.resize(crop)
+                    crop = self.resize(crop)
                     self.save_image_crop(crop,self.make_name(img_path.stem+'crop'+str(crop_number)))
-                    crop_number+=1
-            mask_path=self.get_mask_from_image(img_path)        # Sets corresponding mask path for given image path
-            mask=self.open_image(mask_path, is_mask=True)            # Loads corresponding mask of image
-            mask=self.presize(mask)
-            crop_number=1
-            for crop in(self.crop_image(mask)):
-                    crop=self.resize(crop)
+                    crop_number += 1
+            mask_path = self.get_mask_from_image(img_path)        # Sets corresponding mask path for given image path
+            mask = self.open_image(mask_path, is_mask=True)            # Loads corresponding mask of image
+            mask = self.presize(mask)
+            crop_number = 1
+            for crop in(self.crop_image(mask, is_mask=True)):
+                    crop = self.resize(crop)
                     self.save_mask_crop(crop,self.make_name(img_path.stem+'crop'+str(crop_number)))
-                    crop_number+=1
+                    crop_number += 1
             if self.delete_after_processing:
                 delete_file(img_path)
                 delete_file((mask_path))
