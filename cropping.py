@@ -5,7 +5,10 @@ from tqdm import tqdm
 import numpy as np
 from convenience_functions import delete_file, is_file
 from transformations import *
-class crop_and_save(object):
+
+
+class CropAndSave(object):
+
     """Function crops an image into width_division*height_division number of images and stores the output to OUTPUT_FOLDER
         -----------------------------------------------------Parameters-------------------------------------------------------
                         IM_FOLDER: Path to folder that contains all the images (type is PosixPath or WindowsPath)
@@ -16,7 +19,7 @@ class crop_and_save(object):
                         width_division: Number of divisions to be put along width of the image (type is int)
                         height_division: Number of divisions to be put along height of the image (type is int)
                         size: Size of each crop before resizing
-                        pre_resize: Dimension that original image should be resized to before cropping (typr is (int,int)) default is None, meaning no resizing will occur
+                        pre_resize: (width, height) Dimension that original image should be resized to before cropping (type : (int,int)) default is None, meaning no resizing will occur
                         resize_to: Dimension of final output image after cropping (type is (int,int)) default is None, meaning no resizing will occur
                         images_prefix: Prefix of all output Image crops (type is string)
                         images_ext: Extension with which crops should be saved with (type is string) Eg:'.png'
@@ -100,17 +103,32 @@ class crop_and_save(object):
     def crop_image(self,img):  # iterates through list of crops generated from image
             #col_division equals width division
             #row_division equals height division
-            delta_row=(self.size*self.height_division-(np.shape(img))[0])/(self.height_division-1)   #overlap between crops along height
-            delta_col=(self.size*self.width_division-(np.shape(img))[1])/(self.width_division-1)   #overlap between crops along width
-            if delta_row<0 or delta_col<0:
-                print()
+            if self.height_division == 1 and self.width_division == 1:
+                return img
+            if self.height_division > 1:
+                overlap_rows=(self.size*self.height_division-(np.shape(img))[0])/(self.height_division-1)   #overlap between crops along height
+            elif self.height_division == 1:
+                overlap_rows = 0
+            else:
+                raise ValueError('Height division cannot be negative')
+
+            if self.width_division > 1:
+                overlap_column=(self.size*self.width_division-(np.shape(img))[1])/(self.width_division-1)   #overlap between crops along width
+            elif self.width_division == 1:
+                overlap_column = 0
+            else:
+                raise ValueError('Width division cannto be negative')
+
+            if overlap_rows<0 or overlap_column<0:
+                raise ArithmeticError('Crop overlaps are negative. Please reconsider the cropping and size parameters specified')
+
             for row in range(self.height_division):
                     for col in range(self.width_division):
-                        start_row=int(row*(self.size -delta_row))
-                        start_col=int(col*(self.size -delta_col))
-                        yield(img[start_row:start_row+self.size,start_col:start_col+self.size,:]) 
-                    #crop = cv2.resize(crop,(resize_to,resize_to))
-   
+                        start_row=int(row*(self.size - overlap_rows))
+                        start_col=int(col*(self.size - overlap_column))
+                        yield(img[start_row:start_row+self.size,start_col:start_col+self.size,:])
+
+
     def make_dir(self,dir):                                                                         #creates directory, if it doesnt exist
         if((dir).exists()==False):
                 print("Output file",dir," doesn't exist.\nCreating output directory.")
