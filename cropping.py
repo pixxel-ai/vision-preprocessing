@@ -5,7 +5,10 @@ from tqdm import tqdm
 import numpy as np
 from convenience_functions import delete_file, is_file
 from transformations import *
-class crop_and_save(object):
+
+
+class CropAndSave(object):
+
     """Function crops an image into width_division*height_division number of images and stores the output to OUTPUT_FOLDER
         -----------------------------------------------------Parameters-------------------------------------------------------
                         IM_FOLDER: Path to folder that contains all the images (type is PosixPath or WindowsPath)
@@ -16,7 +19,7 @@ class crop_and_save(object):
                         width_division: Number of divisions to be put along width of the image (type is int)
                         height_division: Number of divisions to be put along height of the image (type is int)
                         size: Size of each crop before resizing
-                        pre_resize: Dimension that original image should be resized to before cropping (typr is (int,int)) default is None, meaning no resizing will occur
+                        pre_resize: (width, height) Dimension that original image should be resized to before cropping (type : (int,int)) default is None, meaning no resizing will occur
                         resize_to: Dimension of final output image after cropping (type is (int,int)) default is None, meaning no resizing will occur
                         images_prefix: Prefix of all output Image crops (type is string)
                         images_ext: Extension with which crops should be saved with (type is string) Eg:'.png'
@@ -31,7 +34,7 @@ class crop_and_save(object):
                             'Buildings' : Convert all non zero pixel values to 2 before saving each mask
                         """
 
-    def __init__(self,IM_FOLDER=Path.cwd()/'Images',
+    def __init__(self, IM_FOLDER=Path.cwd()/'Images',
                  MASK_FOLDER=Path.cwd()/'Masks',
                  OUTPUT_FOLDER=Path.cwd(),
                  IM_OUT='Images',
@@ -46,24 +49,24 @@ class crop_and_save(object):
                  resize_to=None,
                  images_prefix=None,
                  images_ext='.png',
-                 delete_files_after_processing:bool=False,
+                 delete_files_after_processing: bool = False,
                  import_only='Roads',
                  export_as='Roads'):
-            self.IM_FOLDER=IM_FOLDER
-            self.MASK_FOLDER=MASK_FOLDER
-            self.OUTPUT_FOLDER=OUTPUT_FOLDER
-            self.IM_OUT=IM_OUT
-            self.MASK_OUT=MASK_OUT
-            self.get_mask_from_image=get_mask_from_image
-            self.width_division=width_division
+            self.IM_FOLDER = IM_FOLDER
+            self.MASK_FOLDER = MASK_FOLDER
+            self.OUTPUT_FOLDER = OUTPUT_FOLDER
+            self.IM_OUT = IM_OUT
+            self.MASK_OUT = MASK_OUT
+            self.get_mask_from_image = get_mask_from_image
+            self.width_division = width_division
             if height_division:
-                self.height_division=height_division
+                self.height_division = height_division
             else:
-                self.height_division=width_division
-            self.size=size
-            self.resize_to=resize_to
+                self.height_division = width_division
+            self.size = size
+            self.resize_to = resize_to
 
-            self.pre_resize=pre_resize
+            self.pre_resize = pre_resize
             if spatial_resolution_in is not None and spatial_resolution_out is not None:
                 if spatial_resolution_in == spatial_resolution_out:
                     pass
@@ -71,8 +74,8 @@ class crop_and_save(object):
                     self.pre_resize = 'spatial'
                     self.spatial_scale_factor = spatial_resolution_in / spatial_resolution_out
 
-            self.images_prefix=images_prefix if images_prefix is not None else ''
-            self.images_ext=images_ext
+            self.images_prefix = images_prefix if images_prefix is not None else ''
+            self.images_ext = images_ext
             self.delete_after_processing = delete_files_after_processing
 
             self.export_as = export_as
@@ -90,7 +93,8 @@ class crop_and_save(object):
                 self.transformer.transforms.append(convert_to_buildings)
 
         
-    def open_image(self,img_path, is_mask=False):   # Reads and returns image from img_path
+    @staticmethod
+    def open_image(img_path, is_mask=False):   # Reads and returns image from img_path
             if is_mask:
                 mask = cv2.imread(img_path.__str__(), cv2.IMREAD_GRAYSCALE)
                 return mask
@@ -100,21 +104,37 @@ class crop_and_save(object):
     def crop_image(self,img):  # iterates through list of crops generated from image
             #col_division equals width division
             #row_division equals height division
-            delta_row=(self.size*self.height_division-(np.shape(img))[0])/(self.height_division-1)   #overlap between crops along height
-            delta_col=(self.size*self.width_division-(np.shape(img))[1])/(self.width_division-1)   #overlap between crops along width
-            if delta_row<0 or delta_col<0:
-                print()
+            if self.height_division == 1 and self.width_division == 1:
+                return img
+            if self.height_division > 1:
+                overlap_rows=(self.size*self.height_division-(np.shape(img))[0])/(self.height_division-1)   #overlap between crops along height
+            elif self.height_division == 1:
+                overlap_rows = 0
+            else:
+                raise ValueError('Height division cannot be negative')
+
+            if self.width_division > 1:
+                overlap_column=(self.size*self.width_division-(np.shape(img))[1])/(self.width_division-1)   #overlap between crops along width
+            elif self.width_division == 1:
+                overlap_column = 0
+            else:
+                raise ValueError('Width division cannto be negative')
+
+            if overlap_rows<0 or overlap_column<0:
+                raise ArithmeticError('Crop overlaps are negative. Please reconsider the cropping and size parameters specified')
+
             for row in range(self.height_division):
                     for col in range(self.width_division):
-                        start_row=int(row*(self.size -delta_row))
-                        start_col=int(col*(self.size -delta_col))
-                        yield(img[start_row:start_row+self.size,start_col:start_col+self.size,:]) 
-                    #crop = cv2.resize(crop,(resize_to,resize_to))
-   
-    def make_dir(self,dir):                                                                         #creates directory, if it doesnt exist
-        if((dir).exists()==False):
-                print("Output file",dir," doesn't exist.\nCreating output directory.")
-                Path.mkdir(dir,parents=True, exist_ok=False)
+                        start_row=int(row*(self.size - overlap_rows))
+                        start_col=int(col*(self.size - overlap_column))
+                        yield(img[start_row:start_row+self.size,start_col:start_col+self.size,:])
+
+
+    @staticmethod
+    def make_dir(directory):                                                                         #creates directory, if it doesnt exist
+        if (directory).exists()==False:
+                print("Output file", directory, " doesn't exist.\nCreating output directory.")
+                Path.mkdir(directory, parents=True, exist_ok=False)
     
     def save_image_crop(self,crop,image_name):                                                      #saves crop of an image with name as image_name
         location=self.OUTPUT_FOLDER/self.IM_OUT
@@ -129,6 +149,7 @@ class crop_and_save(object):
         location=self.OUTPUT_FOLDER/self.MASK_OUT
         self.make_dir(location)
         crop = self.transformer(crop)
+        # noinspection PyRedundantParentheses
         cv2.imwrite((location/(image_name)).__str__(),crop)
         if is_file(location/image_name):
             return True
@@ -136,7 +157,7 @@ class crop_and_save(object):
             raise IOError
     
     def make_name(self,name):                                                                       #returns name of crop
-        return(self.images_prefix+name+self.images_ext)
+        return self.images_prefix + name + self.images_ext
 
     def presize(self,img):
         if self.pre_resize == 'spatial':

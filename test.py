@@ -1,4 +1,4 @@
-from cropping import crop_and_save
+from cropping import CropAndSave
 from convenience_functions import find_number_in_string
 from pathlib import Path
 
@@ -16,7 +16,7 @@ def get_mask_name(im_path, MSK_FOLDER=MSK_FOLDER, prefix='M_', suffix='.png'):
 
 
 #%%
-processor = crop_and_save(IM_FOLDER=IM_FOLDER,
+processor = CropAndSave(IM_FOLDER=IM_FOLDER,
                           MASK_FOLDER=MSK_FOLDER,
                           OUTPUT_FOLDER=Path.cwd(),
                           IM_OUT='IM_OUT',
