@@ -154,7 +154,7 @@ class crop_and_save(object):
 
     def process(self):
         if __name__ == '__main__':
-            img_path_list = [pth for pth in self.IM_FOLDER.iterdir()]
+            img_path_list = [pth for pth in self.IM_FOLDER.iterdir()] #Iterates over the list of images and passes it to processing function
             make_dir(self.OUTPUT_FOLDER)
             print("\nCropping and saving images and masks from corresponding folders")
             p = Pool(processes=len(img_path_list))

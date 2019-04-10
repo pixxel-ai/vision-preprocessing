@@ -42,7 +42,7 @@ The code executes image processing of images/masks. Firstly, the spatial resolut
     * *open_image* 
     * *change_resolution* : changes the resolution by respective multiplication of dimensions by the factor calculated                                                          * *make_dir*
     * *make_dir* : makes the output directory if it does not exist
-    * *process* : iterates over the image files in the input folder,
+    * *processing* : iterates over the image files in the input folder,
                   also asks for user's choice to delete the original images or not 
     * *crop_image* : crops the image by iterating through the image/mask, the number of overlap times
                     ( calculated in delta_row and delta_col )
@@ -51,7 +51,7 @@ The code executes image processing of images/masks. Firstly, the spatial resolut
     * *make_name* 
     * *presize*
     * *resize* 
-    * *process* 
+    * *process* : Iterates over the list of images and passes it to processing function
                     
 * ### transformations.py ###
     
