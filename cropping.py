@@ -1,6 +1,5 @@
 import cv2
 from pathlib import Path
-import pandas
 from tqdm import tqdm
 import numpy as np
 from convenience_functions import delete_file, is_file
