@@ -152,34 +152,45 @@ class crop_and_save(object):
             return cv2.resize(img,self.resize_to)
         return img
 
-    def process(self,img_path):
+    def process(self):
+        if __name__ == '__main__':
+            img_path_list = [pth for pth in self.IM_FOLDER.iterdir()]
+            make_dir(self.OUTPUT_FOLDER)
+            print("\nCropping and saving images and masks from corresponding folders")
+            p = Pool(processes=len(img_path_list))
+            async_result = p.map_async(processing, tqdm(img_path_list))
+            p.close()
+            p.join()
+            print("\n multiprocessing complete")  # as a checkpoint
+
+
+
+
+    def processing(self,img_path):
         """
-        original code:-
-        :param img_path:
-        :return:
-        img_path_list = [pth for pth in self.IM_FOLDER.iterdir()]  # modify to search for png ,jpg , etc
-        self.make_dir(self.OUTPUT_FOLDER)
-        print("Cropping and saving images and masks from corresponding folders")
-        for img_path in tqdm(img_path_list):
-        """
-            img=self.open_image(img_path)            # Loads image
-            img= self.presize(img)
-            crop_number=1
-            for crop in(self.crop_image(img)):
-                    crop= self.resize(crop)
-                    self.save_image_crop(crop,self.make_name(img_path.stem+'crop'+str(crop_number)))
-                    crop_number+=1
-            mask_path=self.get_mask_from_image(img_path)        # Sets corresponding mask path for given image path
-            mask=self.open_image(mask_path, is_mask=True)            # Loads corresponding mask of image
-            mask=self.presize(mask)
-            crop_number=1
-            for crop in(self.crop_image(mask)):
-                    crop=self.resize(crop)
-                    self.save_mask_crop(crop,self.make_name(img_path.stem+'crop'+str(crop_number)))
-                    crop_number+=1
-            if self.delete_after_processing:
-                delete_file(img_path)
-                delete_file((mask_path))
-
-
-
+                original code:-
+                :param img_path:
+                :return:
+                img_path_list = [pth for pth in self.IM_FOLDER.iterdir()]  # modify to search for png ,jpg , etc
+                self.make_dir(self.OUTPUT_FOLDER)
+                print("Cropping and saving images and masks from corresponding folders")
+                for img_path in tqdm(img_path_list):
+                """
+        img=self.open_image(img_path)            # Loads image
+        img= self.presize(img)
+        crop_number=1
+        for crop in(self.crop_image(img)):
+                crop= self.resize(crop)
+                self.save_image_crop(crop,self.make_name(img_path.stem+'crop'+str(crop_number)))
+                crop_number+=1
+        mask_path=self.get_mask_from_image(img_path)        # Sets corresponding mask path for given image path
+        mask=self.open_image(mask_path, is_mask=True)            # Loads corresponding mask of image
+        mask=self.presize(mask)
+        crop_number=1
+        for crop in(self.crop_image(mask)):
+                crop=self.resize(crop)
+                self.save_mask_crop(crop,self.make_name(img_path.stem+'crop'+str(crop_number)))
+                crop_number+=1
+        if self.delete_after_processing:
+            delete_file(img_path)
+            delete_file((mask_path))
