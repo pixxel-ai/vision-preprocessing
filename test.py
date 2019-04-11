@@ -1,9 +1,6 @@
-from cropping import crop_and_save
+from cropping import CropAndSave
 from convenience_functions import find_number_in_string
 from pathlib import Path
-import multiprocessing
-from multiprocessing import Pool
-from tqdm import tqdm
 
 IM_FOLDER = Path('/Users/akash/Desktop/AI/Pixxel/Roads/Datasets/GANModel Data/mass_IMAGES_TEST copy')
 MSK_FOLDER = Path('/Users/akash/Desktop/AI/Pixxel/Roads/Datasets/GANModel Data/mass_MASKS_TEST copy')
@@ -19,15 +16,15 @@ def get_mask_name(im_path, MSK_FOLDER=MSK_FOLDER, prefix='M_', suffix='.png'):
 
 
 #%%
-processor = crop_and_save(IM_FOLDER=IM_FOLDER,
+processor = CropAndSave(IM_FOLDER=IM_FOLDER,
                           MASK_FOLDER=MSK_FOLDER,
                           OUTPUT_FOLDER=Path.cwd(),
                           IM_OUT='IM_OUT',
                           MASK_OUT='MSK_OUT',
                           get_mask_from_image=get_mask_name,
-                          width_division=2,
-                          height_division=None,
-                          size=750,
+                          width_division=4,
+                          height_division=3,
+                          size=1500,
                           # spatial_resolution_in=1,
                           # spatial_resolution_out=1,
                           pre_resize=None,
@@ -42,3 +39,4 @@ processor = crop_and_save(IM_FOLDER=IM_FOLDER,
 
 #%%
 processor.process()
+
