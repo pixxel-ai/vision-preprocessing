@@ -7,3 +7,5 @@
 *.xml
 .idea/dictionaries/akash.xml
 *.iml
+*.tiff
+test_resize.py

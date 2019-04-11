@@ -4,6 +4,7 @@ import cv2
 from tqdm import tqdm
 from pathos.multiprocessing import ProcessingPool as Pool
 from pathos.multiprocessing import cpu_count
+from transformations import convert_to_roads
 
 distribute_process = Pool(cpu_count())
 
@@ -25,7 +26,9 @@ class ResizeFolder(object):
 
     def open_image(self, PATH, is_mask=False):
         if is_mask:
-            return cv2.imread(str(PATH), cv2.IMREAD_GRAYSCALE)
+            mask = cv2.imread(str(PATH), cv2.IMREAD_GRAYSCALE)
+            mask = convert_to_roads(mask).astype(int)
+            return mask
         else:
             return cv2.imread(str(PATH))
 
