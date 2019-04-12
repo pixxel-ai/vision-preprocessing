@@ -1,5 +1,7 @@
 #%%
 from pathlib import Path
+from functools import partial
+from tqdm import tqdm_notebook as tqdm
 
 #%%
 def find_number_in_string(s):
@@ -46,14 +48,25 @@ def delete_file(PATH)-> bool:
     return True
 
 #%%
-# Testing is_file()
+def rename_folder(PATH, rename_func):
+    """
+    Renames every file in given folder specified by `PATH` according to `rename_func`
+    :param PATH: pathlib.Path : Path of the folder containing files to rename
+    :param rename_func: callable : function that takes as input a path of a file and
+                                  returns the `path` to which the file is to be renamed
+    :return: returns True if all files are succesfully renamed
+    """
+    PATH = Path(PATH).absolute()
+    for f in tqdm(PATH.iterdir()):
+        f.rename(rename_func(f))
+    return True
 
-if __name__=='__main__':
-    TEST = Path.cwd()/'convenience_functions.py'
-    print(is_file(TEST))
-    TEST = Path.cwd()/'convenience_functions2.py'
-    print(is_file(TEST))
-
-    #%%
-    DELETE = Path.cwd()/'MSK_OUT'/'I_0crop2.png'
-    delete_file(DELETE)
+def change_suffix(file, ext):
+    """
+    gives a file's name with extension replaced with `ext`
+    :param file: file to be renamed
+    :param ext: extension to replace the existing extension of `file`
+    :return: new `path` to file with the extension changed to `ext`
+    """
+    file = Path(file)
+    return file.with_suffix(ext)
