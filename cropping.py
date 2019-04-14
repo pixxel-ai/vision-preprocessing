@@ -103,8 +103,6 @@ class CropAndSave(object):
     def crop_image(self,img):  # iterates through list of crops generated from image
             #col_division equals width division
             #row_division equals height division
-            if self.height_division == 1 and self.width_division == 1:
-                return img
             if self.height_division > 1:
                 overlap_rows=(self.size*self.height_division-(np.shape(img))[0])/(self.height_division-1)   #overlap between crops along height
             elif self.height_division == 1:
@@ -121,12 +119,14 @@ class CropAndSave(object):
 
             if overlap_rows<0 or overlap_column<0:
                 raise ArithmeticError('Crop overlaps are negative. Please reconsider the cropping and size parameters specified')
-
-            for row in range(self.height_division):
-                    for col in range(self.width_division):
-                        start_row=int(row*(self.size - overlap_rows))
-                        start_col=int(col*(self.size - overlap_column))
-                        yield(img[start_row:start_row+self.size,start_col:start_col+self.size,:])
+            if self.height_division == 1 and self.width_division == 1:
+                return img
+            else:
+                for row in range(self.height_division):
+                        for col in range(self.width_division):
+                            start_row=int(row*(self.size - overlap_rows))
+                            start_col=int(col*(self.size - overlap_column))
+                            yield(img[start_row:start_row+self.size,start_col:start_col+self.size,:])
 
 
     @staticmethod
