@@ -9,3 +9,4 @@
 *.iml
 *.tiff
 test_resize.py
+resize_func.py
