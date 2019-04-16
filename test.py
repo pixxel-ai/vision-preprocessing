@@ -17,23 +17,23 @@ def get_mask_name(im_path, MSK_FOLDER=MSK_FOLDER, prefix='M_', suffix='.png'):
 
 #%%
 processor = CropAndSave(IM_FOLDER=IM_FOLDER,
-                          MASK_FOLDER=MSK_FOLDER,
-                          OUTPUT_FOLDER=Path.cwd(),
-                          IM_OUT='IM_OUT',
-                          MASK_OUT='MSK_OUT',
-                          get_mask_from_image=get_mask_name,
-                          width_division=2,
-                          height_division=None,
-                          size=750,
-                          # spatial_resolution_in=1,
-                          # spatial_resolution_out=1,
-                          pre_resize=None,
-                          resize_to=None,
-                          images_prefix=None,
-                          images_ext='.png',
-                          delete_files_after_processing=True,
-                          import_only='Buildings',
-                          export_as='Buildings')
+                        MASK_FOLDER=MSK_FOLDER,
+                        OUTPUT_FOLDER=Path.cwd(),
+                        IM_OUT='IM_OUT',
+                        MASK_OUT='MSK_OUT',
+                        get_mask_from_image=get_mask_name,
+                        width_division=4,
+                        height_division=3,
+                        size=1500,
+                        # spatial_resolution_in=1,
+                        # spatial_resolution_out=1,
+                        pre_resize=None,
+                        resize_to=None,
+                        images_prefix=None,
+                        images_ext='.png',
+                        delete_files_after_processing=True,
+                        import_only='Buildings',
+                        export_as='Buildings')
 
 
 
